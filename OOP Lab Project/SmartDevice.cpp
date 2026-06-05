@@ -1,6 +1,8 @@
 #include "SmartDevice.h"
 using namespace std;
+
 SmartDevice::SmartDevice(int id, string n, string l, bool on, string f) : deviceID(id), location(l), name(n), isON(on), firmwareVersion(f) {};
+
 SmartDevice::SmartDevice(const SmartDevice &other)
 {
     deviceID = other.getDeviceID();
@@ -9,22 +11,27 @@ SmartDevice::SmartDevice(const SmartDevice &other)
     isON = other.getIsOn();
     firmwareVersion = other.getFirmwareVersion();
 }
+
 void SmartDevice::setName(string n)
 {
     name = n;
 }
+
 void SmartDevice::setLocation(string l)
 {
     location = l;
 }
+
 void SmartDevice::setVersion(string f)
 {
     firmwareVersion = f;
 }
+
 void SmartDevice::setisON(bool status)
 {
     isON = status;
 }
+
 void SmartDevice::restart()
 {
     if (!isON)
@@ -35,11 +42,11 @@ void SmartDevice::restart()
     cout << "restarting " << name << endl;
     isON = false;
     cout << "Turning off\n";
-
     cout << "Turning on\n";
     isON = true;
     cout << name << " restarted successfully\n";
 }
+
 void SmartDevice::getStatus()
 {
     cout << "device name: " << getName() << endl;
@@ -53,6 +60,7 @@ void SmartDevice::getStatus()
         cout << "device is OFF\n";
     }
 }
+
 void SmartDevice::generateReport()
 {
     cout << "----- Device Report -----\n";
@@ -69,4 +77,9 @@ void SmartDevice::generateReport()
     }
     cout << "Firmware Version: " << firmwareVersion << "\n";
     cout << "-------------------------\n";
+}
+
+bool SmartDevice::operator==(const SmartDevice &other) const
+{
+    return (deviceID == other.getDeviceID());
 }

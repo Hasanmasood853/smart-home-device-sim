@@ -17,11 +17,12 @@ public:
     virtual void toggle() = 0;
     virtual void getStatus() = 0;
     virtual void generateReport() = 0;
+    virtual void restart() = 0;
     void setName(std::string n);
     void setLocation(std::string l);
     void setVersion(std::string f);
     void setisON(bool status);
-    virtual void restart();
+    
     int getDeviceID() const
     {
         return deviceID;
@@ -42,6 +43,10 @@ public:
     {
         return isON;
     }
+    
+    bool operator==(const SmartDevice &other) const;
+    
     virtual ~SmartDevice() {};
 };
+
 #endif
