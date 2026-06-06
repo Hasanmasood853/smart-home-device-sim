@@ -8,7 +8,8 @@ SmartHome::SmartHome(int id, string owner, string wifi)
       deviceCount(0), deviceCapacity(5),
       roomCount(0), roomCapacity(5),
       automationCount(0), automationCapacity(5),
-      logCount(0), logCapacity(5)
+      logCount(0), logCapacity(5),
+      userCount(0), userCapacity(5)
 {
     devices = new SmartDevice *[deviceCapacity];
     for (int i = 0; i < deviceCapacity; i++)
@@ -25,6 +26,10 @@ SmartHome::SmartHome(int id, string owner, string wifi)
     energyLogs = new EnergyLog *[logCapacity];
     for (int i = 0; i < logCapacity; i++)
         energyLogs[i] = nullptr;
+
+    users = new User *[userCapacity];
+    for (int i = 0; i < userCapacity; i++)
+        users[i] = nullptr;
 
     cout << "SmartHome initialized for " << ownerName << endl;
 }
@@ -72,6 +77,16 @@ SmartHome::~SmartHome()
         }
     }
     delete[] energyLogs;
+
+    for (int i = 0; i < userCount; i++)
+    {
+        if (users[i] != nullptr)
+        {
+            delete users[i];
+            users[i] = nullptr;
+        }
+    }
+    delete[] users;
 
     cout << "SmartHome shut down successfully\n";
 }
@@ -122,6 +137,18 @@ void SmartHome::resizeLogs()
         temp[i] = energyLogs[i];
     delete[] energyLogs;
     energyLogs = temp;
+}
+
+void SmartHome::resizeUsers()
+{
+    userCapacity *= 2;
+    User **temp = new User *[userCapacity];
+    for (int i = 0; i < userCapacity; i++)
+        temp[i] = nullptr;
+    for (int i = 0; i < userCount; i++)
+        temp[i] = users[i];
+    delete[] users;
+    users = temp;
 }
 
 void SmartHome::addDevice(SmartDevice *device)
@@ -445,6 +472,11 @@ void SmartHome::generateFullReport()
     cout << "========================================\n";
 }
 
+int SmartHome::getTotalDevicesRegistered()
+{
+    return totalDevicesRegistered;
+}
+
 ostream &operator<<(ostream &os, const SmartHome &home)
 {
     os << "========================================\n";
@@ -456,4 +488,108 @@ ostream &operator<<(ostream &os, const SmartHome &home)
     os << "Automations: " << home.automationCount << "\n";
     os << "========================================\n";
     return os;
+}
+
+// User Authentication Methods
+void SmartHome::addUser(User *user)
+{
+    if (user == nullptr)
+    {
+        cout << "Cannot add null user\n";
+        return;
+    }
+    for (int i = 0; i < userCount; i++)
+    {
+        if (users[i]->getUserID() == user->getUserID())
+        {
+            cout << "User with ID " << user->getUserID() << " already exists\n";
+            return;
+        }
+    }
+    if (userCount >= userCapacity)
+        resizeUsers();
+
+    users[userCount] = user;
+    userCount++;
+    cout << "User " << user->getUsername() << " added successfully\n";
+}
+
+void SmartHome::removeUser(int userID)
+{
+    for (int i = 0; i < userCount; i++)
+    {
+        if (users[i]->getUserID() == userID)
+        {
+            string name = users[i]->getUsername();
+            delete users[i];
+            users[i] = nullptr;
+            for (int j = i; j < userCount - 1; j++)
+                users[j] = users[j + 1];
+            users[userCount - 1] = nullptr;
+            userCount--;
+            cout << "User " << name << " removed successfully\n";
+            return;
+        }
+    }
+    cout << "User with ID " << userID << " not found\n";
+}
+
+User *SmartHome::findUser(int userID)
+{
+    for (int i = 0; i < userCount; i++)
+    {
+        if (users[i]->getUserID() == userID)
+            return users[i];
+    }
+    cout << "User with ID " << userID << " not found\n";
+    return nullptr;
+}
+
+User *SmartHome::authenticateUser(string username, string password)
+{
+    for (int i = 0; i < userCount; i++)
+    {
+        if (users[i]->getUsername() == username)
+        {
+            if (users[i]->login(password))
+                return users[i];
+            else
+                return nullptr;
+        }
+    }
+    cout << "User " << username << " not found!\n";
+    return nullptr;
+}
+
+bool SmartHome::hasPermission(User *user, string requiredRole)
+{
+    if (user == nullptr || !user->getIsLoggedIn())
+    {
+        cout << "Access denied! User not logged in.\n";
+        return false;
+    }
+    
+    string userRole = user->getRole();
+    if (userRole == "admin")
+        return true;
+    if (userRole == requiredRole)
+        return true;
+    
+    cout << "Permission denied! " << user->getUsername() 
+         << " needs " << requiredRole << " role.\n";
+    return false;
+}
+
+void SmartHome::listAllUsers()
+{
+    if (userCount == 0)
+    {
+        cout << "No users registered\n";
+        return;
+    }
+    cout << "\n--- Registered Users ---\n";
+    for (int i = 0; i < userCount; i++)
+    {
+        cout << *users[i] << endl;
+    }
 }

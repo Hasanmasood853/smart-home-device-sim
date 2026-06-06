@@ -5,6 +5,9 @@
 #include <cctype>
 #include "SmartDevice.h"
 #include "Schedulable.h"
+
+using namespace std;
+
 class SmartLight : public SmartDevice, public Schedulable
 {
     int brightness, colorTemperature;
@@ -25,6 +28,7 @@ public:
     void generateReport() override;
     void schedule(std::string time, std::string action) override;
     void cancelSchedule();
+    
     int getBrightness() const
     {
         return brightness;

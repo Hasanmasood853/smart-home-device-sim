@@ -1,5 +1,6 @@
 #include "SmartLock.h"
 using namespace std;
+
 bool SmartLock::isValidCode(string code)
 {
     if (code.empty())
@@ -15,6 +16,7 @@ bool SmartLock::isValidCode(string code)
     }
     return true;
 }
+
 void SmartLock::resizeLogCapacity()
 {
     if (logCount >= logCapacity)
@@ -28,12 +30,14 @@ void SmartLock::resizeLogCapacity()
         accessLog = temp;
     }
 }
+
 bool SmartLock::verifyCode(string code)
 {
     return code == accessCode;
 }
 
-SmartLock::SmartLock(int id, string n, string l, bool on, string f, float power, string mode, string code) : SmartAppliance(id, n, l, on, f, power, mode), accessCode(code), logCount(0), logCapacity(50), isLocked(true)
+SmartLock::SmartLock(int id, string n, string l, bool on, string f, float power, string mode, string code) 
+    : SmartAppliance(id, n, l, on, f, power, mode), accessCode(code), logCount(0), logCapacity(50), isLocked(true)
 {
     accessLog = new string[logCapacity];
     if (!isValidCode(accessCode))
@@ -41,7 +45,8 @@ SmartLock::SmartLock(int id, string n, string l, bool on, string f, float power,
         cout << "Invalid access code setting to default 0000\n";
         accessCode = "0000";
     }
-};
+}
+
 SmartLock::SmartLock(const SmartLock &obj) : SmartAppliance(obj)
 {
     isLocked = obj.getIsLocked();
@@ -54,6 +59,7 @@ SmartLock::SmartLock(const SmartLock &obj) : SmartAppliance(obj)
         accessLog[i] = obj.getAccessLog(i);
     }
 }
+
 void SmartLock::lock()
 {
     if (isLocked)
@@ -63,10 +69,11 @@ void SmartLock::lock()
     }
     isLocked = true;
     resizeLogCapacity();
-    accessLog[logCount] = getName() + " Locked\n";
+    accessLog[logCount] = getName() + " Locked";
     logCount++;
     cout << getName() << " locked successfully with smartLock\n";
 }
+
 void SmartLock::unlock(string code)
 {
     if (!isLocked)
@@ -76,7 +83,6 @@ void SmartLock::unlock(string code)
     }
     if (!verifyCode(code))
     {
-
         cout << "Failed attempt Invalid code\n";
         resizeLogCapacity();
         accessLog[logCount] = getName() + " Failed unlock attempt";
@@ -89,14 +95,17 @@ void SmartLock::unlock(string code)
     accessLog[logCount] = getName() + " Unlocked successfully";
     logCount++;
 }
+
 float SmartLock::getPowerUsage()
 {
     return getPowerRating();
 }
+
 void SmartLock::startCycle()
 {
     cout << "SmartLock does not support cycle operation\n";
 }
+
 string SmartLock::getAccessLog(int index) const
 {
     if (index < 0 || index >= logCount)
@@ -105,6 +114,7 @@ string SmartLock::getAccessLog(int index) const
     }
     return accessLog[index];
 }
+
 void SmartLock::getAccessHistory()
 {
     if (logCount == 0)
@@ -118,6 +128,7 @@ void SmartLock::getAccessHistory()
         cout << accessLog[i] << endl;
     }
 }
+
 void SmartLock::setAccessCode(string code)
 {
     if (!isValidCode(code))
@@ -127,48 +138,50 @@ void SmartLock::setAccessCode(string code)
     }
     accessCode = code;
 }
+
 void SmartLock::toggle()
 {
     if (getIsOn())
-        setisON(false);
-    else
-        setisON(true);
-    if (isLocked)
     {
-        isLocked = false;
-        cout << getName() << " unlocked via toggle\n";
+        setisON(false);
+        cout << getName() << " turned off\n";
     }
     else
     {
-        lock();
+        setisON(true);
+        cout << getName() << " turned on\n";
     }
 }
+
 void SmartLock::getStatus()
 {
     SmartAppliance::getStatus();
     if (isLocked)
-        cout << "State:locked" << endl;
-    else if (!isLocked)
-        cout << "State:Unlocked" << endl;
+        cout << "State: locked" << endl;
+    else
+        cout << "State: unlocked" << endl;
     cout << "Access code: **** " << endl;
     cout << "Total log entries: " << logCount << endl;
 }
+
 void SmartLock::generateReport()
 {
     SmartAppliance::generateReport();
     if (isLocked)
-        cout << "State:locked" << endl;
-    else if (!isLocked)
-        cout << "State:Unlocked" << endl;
+        cout << "State: locked" << endl;
+    else
+        cout << "State: unlocked" << endl;
     cout << "Total Access attempts: " << logCount << endl;
     getAccessHistory();
 }
+
 void SmartLock::restart()
 {
     SmartAppliance::restart();
     isLocked = true;
     cout << "SmartLock reset — locked for security\n";
 }
+
 SmartLock::~SmartLock()
 {
     delete[] accessLog;

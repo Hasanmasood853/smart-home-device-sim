@@ -8,7 +8,7 @@ SmartAppliance::SmartAppliance(int id, string n, string l, bool on, string f, fl
         cout << "Invalid power rating setting default 100W\n";
         powerRating = 100.0;
     }
-
+    
     if (runMode != "eco" && runMode != "normal" && runMode != "powerful")
     {
         cout << "Invalid run mode setting default normal\n";
@@ -57,7 +57,10 @@ void SmartAppliance::generateReport()
     cout << "Power rating: " << powerRating << "W" << endl;
     cout << "Run mode: " << runMode << endl;
 }
+
 void SmartAppliance::restart()
 {
     SmartDevice::restart();
+    runMode = "normal";
+    cout << "Appliance reset to normal mode\n";
 }

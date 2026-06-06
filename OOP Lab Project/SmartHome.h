@@ -13,6 +13,7 @@
 #include "Automation.h"
 #include "EnergyLog.h"
 #include "Schedulable.h"
+#include "User.h"
 
 class SmartHome
 {
@@ -37,12 +38,17 @@ private:
     int logCount;
     int logCapacity;
 
+    User **users;
+    int userCount;
+    int userCapacity;
+
     static int totalDevicesRegistered;
 
     void resizeDevices();
     void resizeRooms();
     void resizeAutomations();
     void resizeLogs();
+    void resizeUsers();
 
 public:
     SmartHome(int id, std::string owner, std::string wifi);
@@ -95,6 +101,14 @@ public:
     void showAllStatus();
     void generateFullReport();
 
+    // User Authentication Methods
+    void addUser(User *user);
+    void removeUser(int userID);
+    User *findUser(int userID);
+    User *authenticateUser(std::string username, std::string password);
+    bool hasPermission(User *user, std::string requiredRole);
+    void listAllUsers();
+
     int getHomeID() const
     {
         return homeID;
@@ -118,10 +132,6 @@ public:
     int getAutomationCount() const
     {
         return automationCount;
-    }
-    int getTotalDevicesRegistered()
-    {
-        return totalDevicesRegistered;
     }
 
     static int getTotalDevicesRegistered();

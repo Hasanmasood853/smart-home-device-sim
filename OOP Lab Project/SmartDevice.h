@@ -10,6 +10,7 @@ private:
     std::string location;
     bool isON;
     std::string firmwareVersion;
+    static int totalDevices;
 
 public:
     SmartDevice(int id, std::string n, std::string l, bool on, std::string f);
@@ -17,7 +18,7 @@ public:
     virtual void toggle() = 0;
     virtual void getStatus() = 0;
     virtual void generateReport() = 0;
-    virtual void restart() = 0;
+    virtual void restart();
     void setName(std::string n);
     void setLocation(std::string l);
     void setVersion(std::string f);
@@ -44,7 +45,9 @@ public:
         return isON;
     }
     
+    static int getTotalDevices() { return totalDevices; }
     bool operator==(const SmartDevice &other) const;
+    friend std::ostream& operator<<(std::ostream& os, const SmartDevice& device);
     
     virtual ~SmartDevice() {};
 };
