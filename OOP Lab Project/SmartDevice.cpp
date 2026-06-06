@@ -36,14 +36,14 @@ void SmartDevice::restart()
 {
     if (!isON)
     {
-        cout << "device is off\n";
+        cout << "device is off cannot restart\n";
         return;
     }
-    cout << "restarting " << name << endl;
-    isON = false;
+    cout << "restarting " << name << " Firmware: " << firmwareVersion << endl;
+    setisON(false);
     cout << "Turning off\n";
+    setisON(true);
     cout << "Turning on\n";
-    isON = true;
     cout << name << " restarted successfully\n";
 }
 
