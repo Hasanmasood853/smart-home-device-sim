@@ -1,38 +1,42 @@
 #include "SmartHome.h"
 #include <iostream>
 #include <string>
-#include <limits>
-#include <algorithm>
 using namespace std;
 
-void printHeader(const string& title)
+void printHeader(const string &title)
 {
     cout << "\n========================================\n";
     cout << title << "\n";
     cout << "========================================\n";
 }
 
-bool isValidHexColor(const string& hex)
-{
-    if (hex.length() != 7) return false;
-    if (hex[0] != '#') return false;
-    for (int i = 1; i < 7; i++)
-    {
-        if (!isxdigit(hex[i])) return false;
-    }
-    return true;
-}
-
 int getValidIntInput()
 {
     int value;
-    while (!(cin >> value))
+    cin >> value;
+    while (cin.fail())
     {
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.ignore(1000, '\n');
         cout << "Invalid input! Please enter a number: ";
+        cin >> value;
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.ignore(1000, '\n');
+    return value;
+}
+
+float getValidFloatInput()
+{
+    float value;
+    cin >> value;
+    while (cin.fail())
+    {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Invalid input! Please enter a valid decimal number: ";
+        cin >> value;
+    }
+    cin.ignore(1000, '\n');
     return value;
 }
 
@@ -61,9 +65,8 @@ string getValidTime()
     {
         cout << "Enter time (HH:MM format, e.g., 14:30): ";
         time = getValidStringInput();
-        
         if (time.length() == 5 && time[2] == ':' &&
-            isdigit(time[0]) && isdigit(time[1]) && 
+            isdigit(time[0]) && isdigit(time[1]) &&
             isdigit(time[3]) && isdigit(time[4]))
         {
             int hours = (time[0] - '0') * 10 + (time[1] - '0');
@@ -75,84 +78,28 @@ string getValidTime()
     }
 }
 
-void displayMainMenu()
+void controlSmartLightMenu(SmartLight *light)
 {
-    cout << "\n========================================\n";
-    cout << "        SMART HOME CONTROL PANEL        \n";
-    cout << "========================================\n";
-    cout << "1. View All Devices\n";
-    cout << "2. Control a Device\n";
-    cout << "3. View Rooms\n";
-    cout << "4. View Energy Dashboard\n";
-    cout << "5. View Automations\n";
-    cout << "6. Turn ON/OFF All Devices\n";
-    cout << "7. Restart a Device\n";
-    cout << "8. Schedule an Action\n";
-    cout << "9. User Management (Admin Only)\n";
-    cout << "0. Exit\n";
-    cout << "========================================\n";
-    cout << "Enter choice: ";
-}
-
-void controlDeviceMenu(SmartHome& home, User* currentUser)
-{
-    if (currentUser == nullptr || !currentUser->getIsLoggedIn())
-    {
-        cout << "Please login first!\n";
+    if (light == nullptr)
         return;
-    }
-    
-    int id = getValidDeviceID();
-    
-    SmartDevice* device = home.findDevice(id);
-    if (device == nullptr) 
-    {
-        cout << "Device not found!\n";
-        return;
-    }
-    
-    cout << "\n--- Controlling: " << device->getName() << " ---\n";
-    cout << "1. Toggle ON/OFF\n";
-    cout << "2. View Status\n";
-    cout << "3. Restart Device\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
-    {
-        case 1:
-            if (home.hasPermission(currentUser, "user"))
-                device->toggle();
-            break;
-        case 2:
-            device->getStatus();
-            break;
-        case 3:
-            if (home.hasPermission(currentUser, "user"))
-                device->restart();
-            break;
-        default:
-            cout << "Invalid choice!\n";
-    }
-}
 
-void controlSmartLightMenu(SmartLight* light)
-{
-    if (light == nullptr) return;
-    
-    cout << "\n--- SmartLight Controls ---\n";
-    cout << "1. Set Brightness (0-100)\n";
-    cout << "2. Set Color Temperature (2000-6500K)\n";
-    cout << "3. Set Hex Color (#RRGGBB)\n";
-    cout << "4. Dim to Sunset Mode\n";
-    cout << "5. Toggle ON/OFF\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
+    int choice;
+    do
     {
+        cout << "\n--- SmartLight Controls ---\n";
+        cout << "1. Set Brightness (0-100)\n";
+        cout << "2. Set Color Temperature (2000-6500K)\n";
+        cout << "3. Set Hex Color (#RRGGBB)\n";
+        cout << "4. Dim to Sunset Mode\n";
+        cout << "5. Toggle ON/OFF\n";
+        cout << "6. View Status\n";
+        cout << "7. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
         {
             cout << "Enter brightness (0-100): ";
@@ -171,10 +118,7 @@ void controlSmartLightMenu(SmartLight* light)
         {
             cout << "Enter hex color (#RRGGBB): ";
             string hex = getValidStringInput();
-            if (isValidHexColor(hex))
-                light->setHexColor(hex);
-            else
-                cout << "Invalid hex color format! Use # followed by 6 hex digits.\n";
+            light->setHexColor(hex);
             break;
         }
         case 4:
@@ -183,37 +127,52 @@ void controlSmartLightMenu(SmartLight* light)
         case 5:
             light->toggle();
             break;
+        case 6:
+            light->getStatus();
+            break;
+        case 7:
+            cout << "Returning to main menu\n";
+            break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 7);
 }
 
-void controlThermostatMenu(Thermostat* thermo)
+void controlThermostatMenu(Thermostat *thermo)
 {
-    if (thermo == nullptr) return;
-    
-    cout << "\n--- Thermostat Controls ---\n";
-    cout << "1. Set Current Temperature (10-35°C)\n";
-    cout << "2. Set Target Temperature (10-35°C)\n";
-    cout << "3. Change Mode (heat/cool/auto)\n";
-    cout << "4. Toggle ON/OFF\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
+    if (thermo == nullptr)
+        return;
+
+    int choice;
+    do
     {
+        cout << "\n--- Thermostat Controls ---\n";
+        cout << "1. Set Current Temperature (10-35C)\n";
+        cout << "2. Set Target Temperature (10-35C)\n";
+        cout << "3. Change Mode (heat/cool/auto)\n";
+        cout << "4. Toggle ON/OFF\n";
+        cout << "5. Schedule Action\n";
+        cout << "6. Cancel Schedule\n";
+        cout << "7. View Status\n";
+        cout << "8. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
         {
             cout << "Enter current temperature (10-35): ";
-            float temp = getValidIntInput();
+            float temp = getValidFloatInput();
             thermo->setCurrentTemperature(temp);
             break;
         }
         case 2:
         {
             cout << "Enter target temperature (10-35): ";
-            float target = getValidIntInput();
+            float target = getValidFloatInput();
             thermo->setTargetTemperature(target);
             break;
         }
@@ -227,26 +186,50 @@ void controlThermostatMenu(Thermostat* thermo)
         case 4:
             thermo->toggle();
             break;
+        case 5:
+        {
+            string time = getValidTime();
+            cout << "Enter action: ";
+            string action = getValidStringInput();
+            thermo->schedule(time, action);
+            break;
+        }
+        case 6:
+            thermo->cancelSchedule();
+            break;
+        case 7:
+            thermo->getStatus();
+            break;
+        case 8:
+            cout << "Returning to main menu\n";
+            break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 8);
 }
 
-void controlCameraMenu(SecurityCamera* cam)
+void controlCameraMenu(SecurityCamera *cam)
 {
-    if (cam == nullptr) return;
-    
-    cout << "\n--- Security Camera Controls ---\n";
-    cout << "1. Start Recording\n";
-    cout << "2. Stop Recording\n";
-    cout << "3. Set Resolution (720p/1080p/4K)\n";
-    cout << "4. Toggle ON/OFF\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
+    if (cam == nullptr)
+        return;
+
+    int choice;
+    do
     {
+        cout << "\n--- Security Camera Controls ---\n";
+        cout << "1. Start Recording\n";
+        cout << "2. Stop Recording\n";
+        cout << "3. Set Resolution (720p/1080p/4K)\n";
+        cout << "4. Toggle ON/OFF\n";
+        cout << "5. View Status\n";
+        cout << "6. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
             cam->startRecording();
             break;
@@ -263,27 +246,40 @@ void controlCameraMenu(SecurityCamera* cam)
         case 4:
             cam->toggle();
             break;
+        case 5:
+            cam->getStatus();
+            break;
+        case 6:
+            cout << "Returning to main menu\n";
+            break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 6);
 }
 
-void controlLockMenu(SmartLock* lock)
+void controlLockMenu(SmartLock *lock)
 {
-    if (lock == nullptr) return;
-    
-    cout << "\n--- SmartLock Controls ---\n";
-    cout << "1. Unlock (with code)\n";
-    cout << "2. Lock\n";
-    cout << "3. View Access History\n";
-    cout << "4. Change Access Code\n";
-    cout << "5. Toggle ON/OFF\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
+    if (lock == nullptr)
+        return;
+
+    int choice;
+    do
     {
+        cout << "\n--- SmartLock Controls ---\n";
+        cout << "1. Unlock (with code)\n";
+        cout << "2. Lock\n";
+        cout << "3. View Access History\n";
+        cout << "4. Change Access Code\n";
+        cout << "5. Toggle ON/OFF\n";
+        cout << "6. View Status\n";
+        cout << "7. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
         {
             cout << "Enter access code (4 digits): ";
@@ -307,28 +303,42 @@ void controlLockMenu(SmartLock* lock)
         case 5:
             lock->toggle();
             break;
+        case 6:
+            lock->getStatus();
+            break;
+        case 7:
+            cout << "Returning to main menu\n";
+            break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 7);
 }
 
-void controlSpeakerMenu(SmartSpeaker* speaker)
+void controlSpeakerMenu(SmartSpeaker *speaker)
 {
-    if (speaker == nullptr) return;
-    
-    cout << "\n--- SmartSpeaker Controls ---\n";
-    cout << "1. Set Volume (0-100)\n";
-    cout << "2. Play Music\n";
-    cout << "3. Add Connected Service\n";
-    cout << "4. Remove Connected Service\n";
-    cout << "5. List Connected Services\n";
-    cout << "6. Toggle ON/OFF\n";
-    cout << "Enter choice: ";
-    
-    int choice = getValidIntInput();
-    
-    switch(choice)
+    if (speaker == nullptr)
+        return;
+
+    int choice;
+    do
     {
+        cout << "\n--- SmartSpeaker Controls ---\n";
+        cout << "1. Set Volume (0-100)\n";
+        cout << "2. Play Music\n";
+        cout << "3. Trigger Skill\n";
+        cout << "4. Add Connected Service\n";
+        cout << "5. Remove Connected Service\n";
+        cout << "6. List Connected Services\n";
+        cout << "7. Toggle ON/OFF\n";
+        cout << "8. View Status\n";
+        cout << "9. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
         {
             cout << "Enter volume (0-100): ";
@@ -339,82 +349,100 @@ void controlSpeakerMenu(SmartSpeaker* speaker)
         case 2:
         {
             cout << "Enter song name: ";
+            cout << "(e.g. Bohemian rap, Faasle Slowed): ";
             string song = getValidStringInput();
             speaker->playMusic(song);
             break;
         }
         case 3:
         {
-            cout << "Enter service name: ";
+            cout << "Enter skill name\n";
+            cout << "(e.g. weather/timer/news/alarm): ";
+            string skill = getValidStringInput();
+            speaker->triggerSkill(skill);
+            break;
+        }
+        case 4:
+        {
+            cout << "Enter service name\n";
+            cout << "(e.g. Spotify/Netflix/YouTube/Google): ";
             string service = getValidStringInput();
             speaker->addConnectedService(service);
             break;
         }
-        case 4:
+        case 5:
         {
             cout << "Enter service name to remove: ";
             string service = getValidStringInput();
             speaker->removeConnectedService(service);
             break;
         }
-        case 5:
+        case 6:
             speaker->listConnectedServices();
             break;
-        case 6:
+        case 7:
             speaker->toggle();
+            break;
+        case 8:
+            speaker->getStatus();
+            break;
+        case 9:
+            cout << "Returning to main menu\n";
             break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 9);
 }
 
-void userManagementMenu(SmartHome& home, User* currentUser)
+void userManagementMenu(SmartHome &home, User *currentUser)
 {
     if (currentUser == nullptr || !currentUser->getIsLoggedIn())
     {
         cout << "Please login first!\n";
         return;
     }
-    
     if (!home.hasPermission(currentUser, "admin"))
     {
-        cout << "Admin access required for user management!\n";
+        cout << "Admin access required!\n";
         return;
     }
-    
+
     int choice;
-    cout << "\n--- User Management ---\n";
-    cout << "1. Add New User\n";
-    cout << "2. Remove User\n";
-    cout << "3. List All Users\n";
-    cout << "4. Change Your Password\n";
-    cout << "Enter choice: ";
-    choice = getValidIntInput();
-    
-    switch(choice)
+    do
     {
+        cout << "\n--- User Management ---\n";
+        cout << "1. Add New User\n";
+        cout << "2. Remove User\n";
+        cout << "3. List All Users\n";
+        cout << "4. Change Your Password\n";
+        cout << "5. Return to Main Menu\n";
+        cout << "Enter choice: ";
+
+        choice = getValidIntInput();
+
+        switch (choice)
+        {
         case 1:
         {
             int id;
-            string name, password, role;
+            string name, pass, role;
             cout << "Enter user ID: ";
             id = getValidIntInput();
             cout << "Enter username: ";
             name = getValidStringInput();
             cout << "Enter password (min 6 chars): ";
-            password = getValidStringInput();
+            pass = getValidStringInput();
             cout << "Enter role (admin/user/guest): ";
             role = getValidStringInput();
-            
-            User* newUser = new User(id, name, password, role);
+            User *newUser = new User(id, name, pass, role);
             home.addUser(newUser);
             break;
         }
         case 2:
         {
-            int id;
             cout << "Enter user ID to remove: ";
-            id = getValidIntInput();
+            int id = getValidIntInput();
             home.removeUser(id);
             break;
         }
@@ -426,77 +454,97 @@ void userManagementMenu(SmartHome& home, User* currentUser)
             string oldPass, newPass;
             cout << "Enter old password: ";
             oldPass = getValidStringInput();
-            cout << "Enter new password (min 6 chars): ";
+            cout << "Enter new password: ";
             newPass = getValidStringInput();
             currentUser->changePassword(oldPass, newPass);
             break;
         }
+        case 5:
+            cout << "Returning to main menu\n";
+            break;
         default:
             cout << "Invalid choice!\n";
-    }
+        }
+    } while (choice != 5);
+}
+
+void displayMainMenu()
+{
+    cout << "\n========================================\n";
+    cout << "        SMART HOME CONTROL PANEL        \n";
+    cout << "========================================\n";
+    cout << "1. View All Devices Status\n";
+    cout << "2. Control a Device\n";
+    cout << "3. View All Rooms\n";
+    cout << "4. View Energy Dashboard\n";
+    cout << "5. Evaluate Automations\n";
+    cout << "6. Turn ON/OFF All Devices\n";
+    cout << "7. Restart a Device\n";
+    cout << "8. Schedule an Action\n";
+    cout << "9. User Management (Admin Only)\n";
+    cout << "0. Exit\n";
+    cout << "========================================\n";
+    cout << "Enter choice: ";
 }
 
 int main()
 {
     printHeader("SMART HOME SYSTEM INITIALIZATION");
-    
+
     SmartHome myHome(1001, "John Doe", "WiFi_Home_5G");
-    
-    // Create default users
-    User* admin = new User(1, "admin", "Admin@123", "admin");
+
+    User *admin = new User(1, "admin", "Admin@123", "admin");
     myHome.addUser(admin);
-    
-    User* demoUser = new User(2, "user", "User@123", "user");
+    User *demoUser = new User(2, "user", "User@123", "user");
     myHome.addUser(demoUser);
-    
-    // ============================================
-    // USER LOGIN
-    // ============================================
+
     printHeader("USER LOGIN");
-    
+
     string username, password;
-    User* currentUser = nullptr;
+    User *currentUser = nullptr;
     int loginAttempts = 0;
-    
+
     while (currentUser == nullptr && loginAttempts < 3)
     {
         cout << "Username: ";
         getline(cin, username);
         cout << "Password: ";
         getline(cin, password);
-        
         currentUser = myHome.authenticateUser(username, password);
         loginAttempts++;
-        
         if (currentUser == nullptr && loginAttempts < 3)
             cout << "Invalid credentials! " << (3 - loginAttempts) << " attempts left\n";
     }
-    
+
     if (currentUser == nullptr)
     {
         cout << "\nToo many failed attempts! Exiting...\n";
+        delete admin;
+        delete demoUser;
         return 0;
     }
-    
-    cout << "\n✅ Welcome " << currentUser->getUsername() << "! (Role: " << currentUser->getRole() << ")\n";
-    
-    // ============================================
-    // CREATE DEVICES
-    // ============================================
-    printHeader("INITIALIZING DEVICES");
-    
-    SmartLight* livingLight = new SmartLight(1, "Living Room Light", "Living Room", true, "v1.0", 75, 4000, "#FFFFFF");
-    SmartLight* kitchenLight = new SmartLight(2, "Kitchen Light", "Kitchen", false, "v1.0", 60, 3500, "#FFE4B5");
-    SmartLight* bedroomLight = new SmartLight(3, "Bedroom Light", "Bedroom", true, "v1.0", 40, 3000, "#FFA500");
-    Thermostat* mainThermostat = new Thermostat(4, "Main Thermostat", "Living Room", true, "v2.0", 22, 24, "heat");
-    Thermostat* bedroomThermostat = new Thermostat(5, "Bedroom Thermostat", "Bedroom", false, "v2.0", 20, 22, "auto");
-    SecurityCamera* frontCamera = new SecurityCamera(6, "Front Door Camera", "Entrance", true, "v1.5", "1080p");
-    SecurityCamera* backCamera = new SecurityCamera(7, "Backyard Camera", "Backyard", true, "v1.5", "720p");
-    SmartLock* frontLock = new SmartLock(8, "Front Door Lock", "Entrance", true, "v2.0", 50.0, "normal", "1234");
-    SmartLock* backLock = new SmartLock(9, "Back Door Lock", "Backyard", false, "v2.0", 50.0, "normal", "5678");
-    SmartSpeaker* livingSpeaker = new SmartSpeaker(10, "Living Room Speaker", "Living Room", true, "v3.0", 100.0, "normal", 30, "music");
-    SmartSpeaker* kitchenSpeaker = new SmartSpeaker(11, "Kitchen Speaker", "Kitchen", false, "v3.0", 80.0, "eco", 20, "news");
-    
+
+    cout << "\nWelcome " << currentUser->getUsername()
+         << "! (Role: " << currentUser->getRole() << ")\n";
+
+    printHeader("Initializing Devices");
+
+    SmartLight *livingLight = new SmartLight(1, "Living Room Light", "Living Room", true, "v1.0", 75, 4000, "#FFFFFF");
+    SmartLight *kitchenLight = new SmartLight(2, "Kitchen Light", "Kitchen", false, "v1.0", 60, 3500, "#FFE4B5");
+    SmartLight *bedroomLight = new SmartLight(3, "Bedroom Light", "Bedroom", true, "v1.0", 40, 3000, "#FFA500");
+    Thermostat *mainThermostat = new Thermostat(4, "Main Thermostat", "Living Room", true, "v2.0", 22, 24, "heat");
+    Thermostat *bedroomThermostat = new Thermostat(5, "Bedroom Thermostat", "Bedroom", false, "v2.0", 20, 22, "auto");
+    SecurityCamera *frontCamera = new SecurityCamera(6, "Front Door Camera", "Entrance", true, "v1.5", "1080p");
+    SecurityCamera *backCamera = new SecurityCamera(7, "Backyard Camera", "Backyard", true, "v1.5", "720p");
+    SmartLock *frontLock = new SmartLock(8, "Front Door Lock", "Entrance", true, "v2.0", 50.0, "normal", "1234");
+    SmartLock *backLock = new SmartLock(9, "Back Door Lock", "Backyard", false, "v2.0", 50.0, "normal", "5678");
+    SmartSpeaker *livingSpeaker = new SmartSpeaker(10, "Living Room Speaker", "Living Room", true, "v3.0", 100.0, "normal", 30, "music");
+    livingSpeaker->addConnectedService("Spotify");
+    livingSpeaker->addConnectedService("Google");
+    SmartSpeaker *kitchenSpeaker = new SmartSpeaker(11, "Kitchen Speaker", "Kitchen", false, "v3.0", 80.0, "eco", 20, "news");
+    kitchenSpeaker->addConnectedService("YouTube");
+    kitchenSpeaker->addConnectedService("Netflix");
+
     myHome.addDevice(livingLight);
     myHome.addDevice(kitchenLight);
     myHome.addDevice(bedroomLight);
@@ -508,12 +556,11 @@ int main()
     myHome.addDevice(backLock);
     myHome.addDevice(livingSpeaker);
     myHome.addDevice(kitchenSpeaker);
-    
-    // Create Rooms
-    Room* livingRoom = new Room(201, "Living Room", 1);
-    Room* bedroom = new Room(202, "Bedroom", 2);
-    Room* kitchen = new Room(203, "Kitchen", 1);
-    
+
+    Room *livingRoom = new Room(201, "Living Room", 1);
+    Room *bedroom = new Room(202, "Bedroom", 2);
+    Room *kitchen = new Room(203, "Kitchen", 1);
+
     livingRoom->addDevice(livingLight);
     livingRoom->addDevice(mainThermostat);
     livingRoom->addDevice(livingSpeaker);
@@ -522,129 +569,178 @@ int main()
     bedroom->addDevice(bedroomThermostat);
     kitchen->addDevice(kitchenLight);
     kitchen->addDevice(kitchenSpeaker);
-    
+
     myHome.addRoom(livingRoom);
     myHome.addRoom(bedroom);
     myHome.addRoom(kitchen);
-    
-    // Create Energy Logs
-    EnergyLog* lightLog = new EnergyLog(301, livingLight);
-    EnergyLog* thermostatLog = new EnergyLog(302, mainThermostat);
-    EnergyLog* speakerLog = new EnergyLog(303, livingSpeaker);
-    
+
+    EnergyLog *lightLog = new EnergyLog(301, livingLight);
+    EnergyLog *thermostatLog = new EnergyLog(302, mainThermostat);
+    EnergyLog *speakerLog = new EnergyLog(303, livingSpeaker);
+
     lightLog->recordUsage(2.5, "2024-01-15 08:00");
     lightLog->recordUsage(1.8, "2024-01-15 12:00");
     lightLog->recordUsage(3.2, "2024-01-15 18:00");
     thermostatLog->recordUsage(5.5, "2024-01-15 06:00");
     thermostatLog->recordUsage(4.2, "2024-01-15 14:00");
     speakerLog->recordUsage(0.5, "2024-01-15 10:00");
-    
+
     myHome.addEnergyLog(lightLog);
     myHome.addEnergyLog(thermostatLog);
     myHome.addEnergyLog(speakerLog);
-    
-    // Create Automation
-    Automation* nightRoutine = new Automation(401, "time", "22:00");
+
+    Automation *nightRoutine = new Automation(401, "time", "22:00");
     nightRoutine->addAction("Living Room Light", "setBrightness", "20");
     nightRoutine->addAction("Main Thermostat", "setMode", "auto");
     nightRoutine->activate();
     myHome.addAutomation(nightRoutine);
-    
-    cout << "\n✅ System ready! " << myHome.getDeviceCount() << " devices available.\n";
-    
-    // ============================================
-    // MAIN INTERACTIVE LOOP
-    // ============================================
+
+    cout << myHome;
+    cout << "\nSystem ready! " << myHome.getDeviceCount() << " devices loaded. "
+         << "Total ever registered: "
+         << SmartHome::getTotalDevicesRegistered() << "\n";
+
     int choice;
-    do {
+    do
+    {
         displayMainMenu();
         choice = getValidIntInput();
-        
-        switch(choice)
+
+        bool hasUserPerm = myHome.hasPermission(currentUser, "admin") ||
+                           myHome.hasPermission(currentUser, "user");
+
+        switch (choice)
         {
-            case 1:
-                myHome.showAllStatus();
+        case 1:
+            myHome.showAllStatus();
+            break;
+
+        case 2:
+        {
+            int deviceId = getValidDeviceID();
+            cout << "Finding device...\n";
+            SmartDevice *device = myHome.findDevice(deviceId);
+            if (device == nullptr)
                 break;
-            case 2:
-            {
-                int deviceId = getValidDeviceID();
-                SmartDevice* device = myHome.findDevice(deviceId);
-                if (device == nullptr) break;
-                
-                // Check device type and show appropriate menu
-                SmartLight* light = dynamic_cast<SmartLight*>(device);
-                Thermostat* thermo = dynamic_cast<Thermostat*>(device);
-                SecurityCamera* cam = dynamic_cast<SecurityCamera*>(device);
-                SmartLock* lock = dynamic_cast<SmartLock*>(device);
-                SmartSpeaker* speaker = dynamic_cast<SmartSpeaker*>(device);
-                
-                if (light) controlSmartLightMenu(light);
-                else if (thermo) controlThermostatMenu(thermo);
-                else if (cam) controlCameraMenu(cam);
-                else if (lock) controlLockMenu(lock);
-                else if (speaker) controlSpeakerMenu(speaker);
-                else device->getStatus();
-                break;
-            }
-            case 3:
-                if (myHome.hasPermission(currentUser, "user"))
-                {
-                    livingRoom->getRoomStatus();
-                    cout << "\n";
-                    bedroom->getRoomStatus();
-                    cout << "\n";
-                    kitchen->getRoomStatus();
-                }
-                break;
-            case 4:
-                if (myHome.hasPermission(currentUser, "user"))
-                    myHome.getEnergyDashboard();
-                break;
-            case 5:
-                if (myHome.hasPermission(currentUser, "user"))
-                    myHome.evaluateAllAutomations("22:00", "time");
-                break;
-            case 6:
-                if (myHome.hasPermission(currentUser, "user"))
-                {
-                    cout << "1. Turn ON all devices\n2. Turn OFF all devices\nEnter: ";
-                    int subChoice = getValidIntInput();
-                    if (subChoice == 1) myHome.turnOnAll();
-                    else if (subChoice == 2) myHome.turnOffAll();
-                    else cout << "Invalid choice!\n";
-                }
-                break;
-            case 7:
-                if (myHome.hasPermission(currentUser, "user"))
-                {
-                    int id = getValidDeviceID();
-                    myHome.restartDevice(id);
-                }
-                break;
-            case 8:
-                if (myHome.hasPermission(currentUser, "user"))
-                {
-                    int id = getValidDeviceID();
-                    string time = getValidTime();
-                    cout << "Enter action: ";
-                    string action = getValidStringInput();
-                    myHome.scheduleForDevice(id, time, action);
-                }
-                break;
-            case 9:
-                userManagementMenu(myHome, currentUser);
-                break;
-            case 0:
-                cout << "\nGoodbye " << currentUser->getUsername() << "!\n";
-                currentUser->logout();
-                break;
-            default:
-                cout << "Invalid choice! Please enter 0-9.\n";
+
+            SmartLight *light = dynamic_cast<SmartLight *>(device);
+            Thermostat *thermo = dynamic_cast<Thermostat *>(device);
+            SecurityCamera *cam = dynamic_cast<SecurityCamera *>(device);
+            SmartLock *lock = dynamic_cast<SmartLock *>(device);
+            SmartSpeaker *speaker = dynamic_cast<SmartSpeaker *>(device);
+
+            if (light)
+                controlSmartLightMenu(light);
+            else if (thermo)
+                controlThermostatMenu(thermo);
+            else if (cam)
+                controlCameraMenu(cam);
+            else if (lock)
+                controlLockMenu(lock);
+            else if (speaker)
+                controlSpeakerMenu(speaker);
+            else
+                device->getStatus();
+            break;
         }
-    } while(choice != 0);
-    
-    printHeader("SYSTEM SHUTDOWN");
+
+        case 3:
+            if (hasUserPerm)
+            {
+                livingRoom->getRoomStatus();
+                cout << "\n";
+                bedroom->getRoomStatus();
+                cout << "\n";
+                kitchen->getRoomStatus();
+            }
+            break;
+
+        case 4:
+            myHome.getEnergyDashboard();
+            break;
+
+        case 5:
+        {
+            string currentTime = getValidTime();
+            cout << "Enter condition (time/motion_detected/device_state/temperature): ";
+            string condition = getValidStringInput();
+            myHome.evaluateAllAutomations(currentTime, condition);
+            break;
+        }
+
+        case 6:
+        {
+            if (hasUserPerm)
+            {
+                cout << "1. Turn ON all devices\n2. Turn OFF all devices\nEnter: ";
+                int subChoice = getValidIntInput();
+                if (subChoice == 1)
+                    myHome.turnOnAll();
+                else if (subChoice == 2)
+                    myHome.turnOffAll();
+                else
+                    cout << "Invalid choice!\n";
+            }
+            else
+            {
+                cout << "Access Denied!\n";
+            }
+            break;
+        }
+
+        case 7:
+        {
+            if (hasUserPerm)
+            {
+                int id = getValidDeviceID();
+                myHome.restartDevice(id);
+            }
+            else
+            {
+                cout << "Access Denied!\n";
+            }
+            break;
+        }
+        case 8:
+        {
+            int id = getValidDeviceID();
+            SmartDevice *device = myHome.findDevice(id);
+            if (device == nullptr)
+                break;
+
+            Schedulable *schedulable = dynamic_cast<Schedulable *>(device);
+            if (schedulable != nullptr)
+            {
+                string time = getValidTime();
+                schedulable->showAvailableActions();
+
+                cout << "Enter action: ";
+                string action = getValidStringInput();
+                schedulable->schedule(time, action);
+            }
+            else
+            {
+                cout << device->getName() << " does not support scheduling\n";
+            }
+            break;
+        }
+
+        case 9:
+            userManagementMenu(myHome, currentUser);
+            break;
+
+        case 0:
+            cout << "\nGoodbye " << currentUser->getUsername() << "!\n";
+            currentUser->logout();
+            break;
+
+        default:
+            cout << "Invalid choice! Please enter 0-9.\n";
+        }
+    } while (choice != 0);
+
+    printHeader("System Shutdown");
     cout << "Thank you for using Smart Home System!\n";
-    
+
     return 0;
 }

@@ -34,10 +34,10 @@ bool Thermostat::isValidMode(string m)
     return (m == "heat" || m == "cool" || m == "auto");
 }
 
-Thermostat::Thermostat(int id, string n, string l, bool on, string f, 
-                       int temp, int target, string m) 
-    : SmartDevice(id, n, l, on, f), currentTemperature((float)temp), 
-      targetTemperature((float)target), mode(m), scheduledTime(""), 
+Thermostat::Thermostat(int id, string n, string l, bool on, string f,
+                       int temp, int target, string m)
+    : SmartDevice(id, n, l, on, f), currentTemperature((float)temp),
+      targetTemperature((float)target), mode(m), scheduledTime(""),
       scheduledAction(""), isScheduled(false)
 {
     if (!isValidTemperature(currentTemperature))
@@ -45,13 +45,13 @@ Thermostat::Thermostat(int id, string n, string l, bool on, string f,
         cout << "Invalid temperature range (10-35°C) setting default 22°C\n";
         currentTemperature = 22.0;
     }
-    
+
     if (!isValidTemperature(targetTemperature))
     {
         cout << "Invalid target temperature range (10-35°C) setting default 22°C\n";
         targetTemperature = 22.0;
     }
-    
+
     if (!isValidMode(mode))
     {
         cout << "Invalid mode setting default auto\n";
@@ -119,11 +119,11 @@ void Thermostat::toggle()
 void Thermostat::getStatus()
 {
     SmartDevice::getStatus();
-    
-    cout << "Current temperature: " << currentTemperature << "°C" << endl;
-    cout << "Target temperature: " << targetTemperature << "°C" << endl;
+
+    cout << "Current temperature: " << currentTemperature << " C" << endl;
+    cout << "Target temperature: " << targetTemperature << " C" << endl;
     cout << "Mode: " << mode << endl;
-    
+
     if (isScheduled)
     {
         cout << "Scheduled at " << scheduledTime << " to " << scheduledAction << endl;
@@ -137,12 +137,12 @@ void Thermostat::getStatus()
 void Thermostat::generateReport()
 {
     SmartDevice::generateReport();
-    
+
     cout << "Current temperature: " << currentTemperature << "°C" << endl;
     cout << "Target temperature: " << targetTemperature << "°C" << endl;
     cout << "Difference: " << (targetTemperature - currentTemperature) << "°C" << endl;
     cout << "Mode: " << mode << endl;
-    
+
     if (isScheduled)
     {
         cout << "Scheduled time: " << scheduledTime << endl;
@@ -157,19 +157,19 @@ void Thermostat::schedule(string time, string action)
         cout << "Device is off - can't schedule it\n";
         return;
     }
-    
+
     if (!isValidTime(time))
     {
         cout << "Invalid time! Only supported format: HH:MM (e.g., 14:30)\n";
         return;
     }
-    
+
     if (action.empty())
     {
         cout << "Action cannot be empty\n";
         return;
     }
-    
+
     scheduledTime = time;
     scheduledAction = action;
     isScheduled = true;
@@ -197,4 +197,8 @@ void Thermostat::restart()
     targetTemperature = 22.0;
     mode = "auto";
     cout << "Thermostat reset to default settings" << endl;
+}
+void Thermostat::showAvailableActions()
+{
+    cout << "Thermostat Actions: 'heat', 'cool', 'auto', 'turn_on', 'turn_off'\n";
 }

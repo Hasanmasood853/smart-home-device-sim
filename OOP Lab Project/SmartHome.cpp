@@ -490,7 +490,6 @@ ostream &operator<<(ostream &os, const SmartHome &home)
     return os;
 }
 
-// User Authentication Methods
 void SmartHome::addUser(User *user)
 {
     if (user == nullptr)

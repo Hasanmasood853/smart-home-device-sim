@@ -30,7 +30,7 @@ bool SecurityCamera::isValidResolution(string res)
 }
 
 SecurityCamera::SecurityCamera(int id, string n, string l, bool on, string f, string res)
-    : SmartDevice(id, n, l, on, f), resolution(res), isRecording(false), 
+    : SmartDevice(id, n, l, on, f), resolution(res), isRecording(false),
       scheduledTime(""), scheduledAction(""), isScheduled(false)
 {
     if (!isValidResolution(resolution))
@@ -112,7 +112,7 @@ void SecurityCamera::toggle()
 void SecurityCamera::getStatus()
 {
     SmartDevice::getStatus();
-    
+
     cout << "Resolution: " << resolution << endl;
     if (isRecording)
     {
@@ -122,7 +122,7 @@ void SecurityCamera::getStatus()
     {
         cout << "Status: Not recording" << endl;
     }
-    
+
     if (isScheduled)
     {
         cout << "Scheduled at " << scheduledTime << " to " << scheduledAction << endl;
@@ -136,10 +136,10 @@ void SecurityCamera::getStatus()
 void SecurityCamera::generateReport()
 {
     SmartDevice::generateReport();
-    
+
     cout << "Resolution: " << resolution << endl;
     cout << "Recording status: " << (isRecording ? "Recording" : "Not recording") << endl;
-    
+
     if (isScheduled)
     {
         cout << "Scheduled time: " << scheduledTime << endl;
@@ -154,25 +154,25 @@ void SecurityCamera::schedule(string time, string action)
         cout << "Device is off - can't schedule it\n";
         return;
     }
-    
+
     if (!isValidTime(time))
     {
         cout << "Invalid time! Only supported format: HH:MM (e.g., 14:30)\n";
         return;
     }
-    
+
     if (action.empty())
     {
         cout << "Action cannot be empty\n";
         return;
     }
-    
+
     if (action != "start" && action != "stop")
     {
         cout << "Invalid action! Use 'start' or 'stop'\n";
         return;
     }
-    
+
     scheduledTime = time;
     scheduledAction = action;
     isScheduled = true;
@@ -200,4 +200,8 @@ void SecurityCamera::restart()
     isRecording = false;
     resolution = "1080p";
     cout << "Camera reset to default settings" << endl;
+}
+void SecurityCamera::showAvailableActions()
+{
+    cout << "--> Camera Actions: 'record_start', 'record_stop', 'turn_on', 'turn_off'\n";
 }

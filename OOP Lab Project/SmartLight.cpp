@@ -94,7 +94,7 @@ void SmartLight::setHexColor(string h)
 {
     if (!isValidHexColor(h))
     {
-        cout << "Invalid hex color\n";
+        cout << "Invalid hex color format! Use # followed by 6 hex digits\n";
         return;
     }
     hexColor = h;
@@ -168,4 +168,8 @@ void SmartLight::cancelSchedule()
     {
         cout << "No active schedule found for " << getName() << endl;
     }
+}
+void SmartLight::showAvailableActions()
+{
+    cout << "SmartLight Actions: turn_on, turn_off dim_sunset\n";
 }
