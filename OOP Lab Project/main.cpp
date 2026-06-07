@@ -519,8 +519,6 @@ int main()
     if (currentUser == nullptr)
     {
         cout << "\nToo many failed attempts! Exiting...\n";
-        delete admin;
-        delete demoUser;
         return 0;
     }
 
@@ -606,9 +604,6 @@ int main()
         displayMainMenu();
         choice = getValidIntInput();
 
-        bool hasUserPerm = myHome.hasPermission(currentUser, "admin") ||
-                           myHome.hasPermission(currentUser, "user");
-
         switch (choice)
         {
         case 1:
@@ -618,16 +613,11 @@ int main()
         case 2:
         {
             int deviceId = getValidDeviceID();
-            cout << "Finding device...\n";
-            SmartDevice *device = myHome.findDevice(deviceId);
-            if (device == nullptr)
-                break;
-
-            SmartLight *light = dynamic_cast<SmartLight *>(device);
-            Thermostat *thermo = dynamic_cast<Thermostat *>(device);
-            SecurityCamera *cam = dynamic_cast<SecurityCamera *>(device);
-            SmartLock *lock = dynamic_cast<SmartLock *>(device);
-            SmartSpeaker *speaker = dynamic_cast<SmartSpeaker *>(device);
+            SmartLight *light = myHome.findDeviceOfType<SmartLight>(deviceId);
+            Thermostat *thermo = myHome.findDeviceOfType<Thermostat>(deviceId);
+            SecurityCamera *cam = myHome.findDeviceOfType<SecurityCamera>(deviceId);
+            SmartLock *lock = myHome.findDeviceOfType<SmartLock>(deviceId);
+            SmartSpeaker *speaker = myHome.findDeviceOfType<SmartSpeaker>(deviceId);
 
             if (light)
                 controlSmartLightMenu(light);
@@ -640,21 +630,23 @@ int main()
             else if (speaker)
                 controlSpeakerMenu(speaker);
             else
-                device->getStatus();
+            {
+                SmartDevice *device = myHome.findDevice(deviceId);
+                if (device != nullptr)
+                    device->getStatus();
+            }
             break;
         }
 
         case 3:
-            if (hasUserPerm)
-            {
-                livingRoom->getRoomStatus();
-                cout << "\n";
-                bedroom->getRoomStatus();
-                cout << "\n";
-                kitchen->getRoomStatus();
-            }
+        {
+            livingRoom->getRoomStatus();
+            cout << "\n";
+            bedroom->getRoomStatus();
+            cout << "\n";
+            kitchen->getRoomStatus();
             break;
-
+        }
         case 4:
             myHome.getEnergyDashboard();
             break;
@@ -670,9 +662,12 @@ int main()
 
         case 6:
         {
-            if (hasUserPerm)
+            if (myHome.hasPermission(currentUser, "user") ||
+                myHome.hasPermission(currentUser, "admin"))
             {
-                cout << "1. Turn ON all devices\n2. Turn OFF all devices\nEnter: ";
+                cout << "1. Turn ON all devices\n";
+                cout << "2. Turn OFF all devices\n";
+                cout << "Enter: ";
                 int subChoice = getValidIntInput();
                 if (subChoice == 1)
                     myHome.turnOnAll();
@@ -683,24 +678,26 @@ int main()
             }
             else
             {
-                cout << "Access Denied!\n";
+                cout << "Access Denied! User or Admin role required\n";
             }
             break;
         }
 
         case 7:
         {
-            if (hasUserPerm)
+            if (myHome.hasPermission(currentUser, "user") ||
+                myHome.hasPermission(currentUser, "admin"))
             {
                 int id = getValidDeviceID();
                 myHome.restartDevice(id);
             }
             else
             {
-                cout << "Access Denied!\n";
+                cout << "Access Denied! User or Admin role required\n";
             }
             break;
         }
+
         case 8:
         {
             int id = getValidDeviceID();
@@ -712,8 +709,6 @@ int main()
             if (schedulable != nullptr)
             {
                 string time = getValidTime();
-                schedulable->showAvailableActions();
-
                 cout << "Enter action: ";
                 string action = getValidStringInput();
                 schedulable->schedule(time, action);

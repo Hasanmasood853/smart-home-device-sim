@@ -160,7 +160,7 @@ void SmartHome::addDevice(SmartDevice *device)
     }
     for (int i = 0; i < deviceCount; i++)
     {
-        if (devices[i]->getDeviceID() == device->getDeviceID())
+        if (*devices[i] == *device)
         {
             cout << "Device with ID " << device->getDeviceID() << " already exists\n";
             return;
@@ -567,14 +567,14 @@ bool SmartHome::hasPermission(User *user, string requiredRole)
         cout << "Access denied! User not logged in.\n";
         return false;
     }
-    
+
     string userRole = user->getRole();
     if (userRole == "admin")
         return true;
     if (userRole == requiredRole)
         return true;
-    
-    cout << "Permission denied! " << user->getUsername() 
+
+    cout << "Permission denied! " << user->getUsername()
          << " needs " << requiredRole << " role.\n";
     return false;
 }

@@ -10,7 +10,6 @@ private:
     std::string location;
     bool isON;
     std::string firmwareVersion;
-    static int totalDevices;
 
 public:
     SmartDevice(int id, std::string n, std::string l, bool on, std::string f);
@@ -23,7 +22,7 @@ public:
     void setLocation(std::string l);
     void setVersion(std::string f);
     void setisON(bool status);
-    
+
     int getDeviceID() const
     {
         return deviceID;
@@ -44,11 +43,9 @@ public:
     {
         return isON;
     }
-    
-    static int getTotalDevices() { return totalDevices; }
+
     bool operator==(const SmartDevice &other) const;
-    friend std::ostream& operator<<(std::ostream& os, const SmartDevice& device);
-    
+
     virtual ~SmartDevice() {};
 };
 

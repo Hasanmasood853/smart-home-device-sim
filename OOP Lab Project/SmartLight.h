@@ -6,8 +6,6 @@
 #include "SmartDevice.h"
 #include "Schedulable.h"
 
-using namespace std;
-
 class SmartLight : public SmartDevice, public Schedulable
 {
     int brightness, colorTemperature;
@@ -45,11 +43,11 @@ public:
     {
         return isScheduled;
     }
-    string getScheduledTime() const
+    std::string  getScheduledTime() const
     {
         return scheduledTime;
     }
-    string getScheduledAction() const
+    std::string  getScheduledAction() const
     {
         return scheduledAction;
     }

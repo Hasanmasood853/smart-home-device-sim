@@ -1,11 +1,8 @@
 #include "SmartDevice.h"
 using namespace std;
 
-int SmartDevice::totalDevices = 0;
-
 SmartDevice::SmartDevice(int id, string n, string l, bool on, string f) : deviceID(id), location(l), name(n), isON(on), firmwareVersion(f)
 {
-    totalDevices++;
 }
 
 SmartDevice::SmartDevice(const SmartDevice &other)
@@ -15,7 +12,6 @@ SmartDevice::SmartDevice(const SmartDevice &other)
     location = other.getLocation();
     isON = other.getIsOn();
     firmwareVersion = other.getFirmwareVersion();
-    totalDevices++;
 }
 
 void SmartDevice::setName(string n)
@@ -88,12 +84,4 @@ void SmartDevice::generateReport()
 bool SmartDevice::operator==(const SmartDevice &other) const
 {
     return (deviceID == other.getDeviceID());
-}
-
-ostream& operator<<(ostream& os, const SmartDevice& device)
-{
-    os << "Device ID: " << device.getDeviceID() << ", Name: " << device.getName() 
-       << ", Location: " << device.getLocation() << ", Status: " 
-       << (device.getIsOn() ? "ON" : "OFF");
-    return os;
 }

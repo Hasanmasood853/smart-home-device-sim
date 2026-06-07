@@ -1,5 +1,5 @@
 #include "SecurityCamera.h"
-
+using namespace std;
 bool SecurityCamera::isValidTime(string time)
 {
     if (time.empty())
@@ -147,61 +147,10 @@ void SecurityCamera::generateReport()
     }
 }
 
-void SecurityCamera::schedule(string time, string action)
-{
-    if (!getIsOn())
-    {
-        cout << "Device is off - can't schedule it\n";
-        return;
-    }
-
-    if (!isValidTime(time))
-    {
-        cout << "Invalid time! Only supported format: HH:MM (e.g., 14:30)\n";
-        return;
-    }
-
-    if (action.empty())
-    {
-        cout << "Action cannot be empty\n";
-        return;
-    }
-
-    if (action != "start" && action != "stop")
-    {
-        cout << "Invalid action! Use 'start' or 'stop'\n";
-        return;
-    }
-
-    scheduledTime = time;
-    scheduledAction = action;
-    isScheduled = true;
-    cout << getName() << " scheduled at " << scheduledTime << " to " << scheduledAction << " recording" << endl;
-}
-
-void SecurityCamera::cancelSchedule()
-{
-    if (isScheduled)
-    {
-        scheduledTime = "";
-        scheduledAction = "";
-        isScheduled = false;
-        cout << getName() << " schedule cancelled successfully\n";
-    }
-    else
-    {
-        cout << "No active schedule found for " << getName() << endl;
-    }
-}
-
 void SecurityCamera::restart()
 {
     SmartDevice::restart();
     isRecording = false;
     resolution = "1080p";
     cout << "Camera reset to default settings" << endl;
-}
-void SecurityCamera::showAvailableActions()
-{
-    cout << "--> Camera Actions: 'record_start', 'record_stop', 'turn_on', 'turn_off'\n";
 }
