@@ -1,28 +1,5 @@
 #include "SecurityCamera.h"
 using namespace std;
-bool SecurityCamera::isValidTime(string time)
-{
-    if (time.empty())
-        return false;
-    if (time.length() != 5)
-        return false;
-    if (time[2] != ':')
-        return false;
-    for (int i = 0; i < 5; i++)
-    {
-        if (i == 2)
-            continue;
-        if (!isdigit(time[i]))
-            return false;
-    }
-    int hours = (time[0] - '0') * 10 + (time[1] - '0');
-    int minutes = (time[3] - '0') * 10 + (time[4] - '0');
-    if (hours < 0 || hours > 23)
-        return false;
-    if (minutes < 0 || minutes > 59)
-        return false;
-    return true;
-}
 
 bool SecurityCamera::isValidResolution(string res)
 {
@@ -30,8 +7,7 @@ bool SecurityCamera::isValidResolution(string res)
 }
 
 SecurityCamera::SecurityCamera(int id, string n, string l, bool on, string f, string res)
-    : SmartDevice(id, n, l, on, f), resolution(res), isRecording(false),
-      scheduledTime(""), scheduledAction(""), isScheduled(false)
+    : SmartDevice(id, n, l, on, f), resolution(res), isRecording(false)
 {
     if (!isValidResolution(resolution))
     {
@@ -44,9 +20,6 @@ SecurityCamera::SecurityCamera(const SecurityCamera &other) : SmartDevice(other)
 {
     resolution = other.getResolution();
     isRecording = other.getIsRecording();
-    scheduledTime = other.getScheduledTime();
-    scheduledAction = other.getScheduledAction();
-    isScheduled = other.getIsScheduled();
 }
 
 void SecurityCamera::setResolution(string res)
@@ -122,15 +95,6 @@ void SecurityCamera::getStatus()
     {
         cout << "Status: Not recording" << endl;
     }
-
-    if (isScheduled)
-    {
-        cout << "Scheduled at " << scheduledTime << " to " << scheduledAction << endl;
-    }
-    else
-    {
-        cout << "No active schedule" << endl;
-    }
 }
 
 void SecurityCamera::generateReport()
@@ -139,12 +103,6 @@ void SecurityCamera::generateReport()
 
     cout << "Resolution: " << resolution << endl;
     cout << "Recording status: " << (isRecording ? "Recording" : "Not recording") << endl;
-
-    if (isScheduled)
-    {
-        cout << "Scheduled time: " << scheduledTime << endl;
-        cout << "Scheduled action: " << scheduledAction << endl;
-    }
 }
 
 void SecurityCamera::restart()
@@ -152,5 +110,5 @@ void SecurityCamera::restart()
     SmartDevice::restart();
     isRecording = false;
     resolution = "1080p";
-    cout << "Camera reset to default settings" << endl;
+    cout << "Camera restarted/reset to default settings" << endl;
 }

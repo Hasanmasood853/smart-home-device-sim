@@ -20,7 +20,7 @@ class Thermostat : public SmartDevice, public Schedulable
     bool isValidMode(string m);
 
 public:
-    Thermostat(int id, string n, string l, bool on, string f, int temp, int target, std::string m);
+    Thermostat(int id, string n, string l, bool on, string f, float temp, int target, std::string m);
     Thermostat(const Thermostat &other);
 
     void setCurrentTemperature(float t);
@@ -58,7 +58,6 @@ public:
     {
         return scheduledAction;
     }
-    void showAvailableActions();
     ~Thermostat() {};
 };
 

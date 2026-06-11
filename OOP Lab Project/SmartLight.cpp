@@ -169,7 +169,3 @@ void SmartLight::cancelSchedule()
         cout << "No active schedule found for " << getName() << endl;
     }
 }
-void SmartLight::showAvailableActions()
-{
-    cout << "SmartLight Actions: turn_on, turn_off dim_sunset\n";
-}

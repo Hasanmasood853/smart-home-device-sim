@@ -66,19 +66,11 @@ public:
             if (devices[i]->getDeviceID() == deviceID)
             {
                 T *typed = dynamic_cast<T *>(devices[i]);
-                if (typed != nullptr)
-                    return typed;
-                else
-                {
-                    std::cout << "Device found but type mismatch\n";
-                    return nullptr;
-                }
+                return typed;
             }
         }
-        std::cout << "Device not found\n";
         return nullptr;
     }
-
     void addRoom(Room *room);
     void removeRoom(int roomID);
     Room *findRoom(int roomID);
@@ -86,7 +78,9 @@ public:
     void addAutomation(Automation *automation);
     void removeAutomation(int ruleID);
     void evaluateAllAutomations(std::string currentTime, std::string currentCondition);
-
+    void displayAllAutomations();
+    void activateAutomation(int ruleID);
+    void deactivateAutomation(int ruleID);
     void addEnergyLog(EnergyLog *log);
     void getEnergyDashboard();
 
@@ -101,7 +95,6 @@ public:
     void showAllStatus();
     void generateFullReport();
 
-    // User Authentication Methods
     void addUser(User *user);
     void removeUser(int userID);
     User *findUser(int userID);

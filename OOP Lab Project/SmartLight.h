@@ -26,7 +26,6 @@ public:
     void generateReport() override;
     void schedule(std::string time, std::string action) override;
     void cancelSchedule();
-    void showAvailableActions() override;
     int getBrightness() const
     {
         return brightness;

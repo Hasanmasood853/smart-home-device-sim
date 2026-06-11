@@ -63,12 +63,12 @@ void Room::removeDevice(int id)
     }
     if (deviceIdx != -1)
     {
+        string name = devices[deviceIdx]->getName();
         for (int i = deviceIdx; i < deviceCount - 1; i++)
-        {
             devices[i] = devices[i + 1];
-        }
-        cout << devices[deviceCount]->getName() << " successfully removed\n";
+        devices[deviceCount - 1] = nullptr;
         deviceCount--;
+        cout << name << " successfully removed\n";
     }
     else
     {

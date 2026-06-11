@@ -35,8 +35,8 @@ bool Thermostat::isValidMode(string m)
 }
 
 Thermostat::Thermostat(int id, string n, string l, bool on, string f,
-                       int temp, int target, string m)
-    : SmartDevice(id, n, l, on, f), currentTemperature((float)temp),
+                       float temp, int target, string m)
+    : SmartDevice(id, n, l, on, f), currentTemperature(temp),
       targetTemperature((float)target), mode(m), scheduledTime(""),
       scheduledAction(""), isScheduled(false)
 {
@@ -197,8 +197,4 @@ void Thermostat::restart()
     targetTemperature = 22.0;
     mode = "auto";
     cout << "Thermostat reset to default settings" << endl;
-}
-void Thermostat::showAvailableActions()
-{
-    cout << "Thermostat Actions: 'heat', 'cool', 'auto', 'turn_on', 'turn_off'\n";
 }

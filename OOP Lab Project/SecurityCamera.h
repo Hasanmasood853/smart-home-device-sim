@@ -8,11 +8,6 @@ class SecurityCamera : public SmartDevice
 {
     std::string resolution;
     bool isRecording;
-    std::string scheduledTime;
-    std::string scheduledAction;
-    bool isScheduled;
-
-    bool isValidTime(std::string time);
     bool isValidResolution(std::string  res);
 
 public:
@@ -35,18 +30,6 @@ public:
     bool getIsRecording() const
     {
         return isRecording;
-    }
-    bool getIsScheduled() const
-    {
-        return isScheduled;
-    }
-    std::string getScheduledTime() const
-    {
-        return scheduledTime;
-    }
-    std::string getScheduledAction() const
-    {
-        return scheduledAction;
     }
 
     ~SecurityCamera() {};

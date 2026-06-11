@@ -313,7 +313,51 @@ void SmartHome::evaluateAllAutomations(string currentTime, string currentConditi
     for (int i = 0; i < automationCount; i++)
         automations[i]->evaluateTrigger(currentTime, currentCondition);
 }
+void SmartHome::displayAllAutomations()
+{
+    if (automationCount == 0)
+    {
+        cout << "No automations found\n";
+        return;
+    }
+    cout << "\n--- All Automations ---\n";
+    for (int i = 0; i < automationCount; i++)
+    {
+        cout << "Rule ID:   " << automations[i]->getRuleID()           << endl;
+        cout << "Condition: " << automations[i]->getTriggerCondition() << endl;
+        cout << "Time:      " << automations[i]->getTriggerTime()      << endl;
+        cout << "Status:    " << (automations[i]->getIsActive() ? "Active" : "Inactive") << endl;
+        cout << "Actions:\n";
+        automations[i]->displayActions();
+        cout << "------------------------\n";
+    }
+}
 
+void SmartHome::activateAutomation(int ruleID)
+{
+    for (int i = 0; i < automationCount; i++)
+    {
+        if (automations[i]->getRuleID() == ruleID)
+        {
+            automations[i]->activate();
+            return;
+        }
+    }
+    cout << "Automation with ID " << ruleID << " not found\n";
+}
+
+void SmartHome::deactivateAutomation(int ruleID)
+{
+    for (int i = 0; i < automationCount; i++)
+    {
+        if (automations[i]->getRuleID() == ruleID)
+        {
+            automations[i]->deactivate();
+            return;
+        }
+    }
+    cout << "Automation with ID " << ruleID << " not found\n";
+}
 void SmartHome::addEnergyLog(EnergyLog *log)
 {
     if (log == nullptr)
